@@ -1,0 +1,15 @@
+name: crossword_generator
+description: "Generate all possible crosswords from a list of words."
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: '>=3.4.4 <4.0.0'
+
+dependencies:
+  meta: ^1.15.0
+  
+
+dev_dependencies:
+  test: ^1.16.0
+  lints: ^4.0.0
