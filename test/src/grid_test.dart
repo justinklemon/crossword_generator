@@ -333,31 +333,31 @@ M       L
       });
     });
 
-    group('Test hashCodeFromValuesOnly', () {
-      test('Test hashCodeFromValuesOnly empty grids', () {
+    group('Test relativeHashCode', () {
+      test('Test relativeHashCode empty grids', () {
         final grid1 = Grid<int>();
         final grid2 = Grid<int>();
-        expect(grid1.hashCodeFromValuesOnly, grid2.hashCodeFromValuesOnly);
+        expect(grid1.relativeHashCode, grid2.relativeHashCode);
       });
 
-      test('Test hashCodeFromValuesOnly single item grid, same place', () {
+      test('Test relativeHashCode single item grid, same place', () {
         final grid1 = Grid<int>();
         final grid2 = Grid<int>();
         grid1.set(const Coordinates(x: 0, y: 0), 42);
         grid2.set(const Coordinates(x: 0, y: 0), 42);
-        expect(grid1.hashCodeFromValuesOnly, grid2.hashCodeFromValuesOnly);
+        expect(grid1.relativeHashCode, grid2.relativeHashCode);
       });
 
-      test('Test hashCodeFromValuesOnly single item grid, different place', () {
+      test('Test relativeHashCode single item grid, different place', () {
         final grid1 = Grid<int>();
         final grid2 = Grid<int>();
         grid1.set(const Coordinates(x: 0, y: 0), 42);
         grid2.set(const Coordinates(x: 1, y: 0), 42);
-        expect(grid1.hashCodeFromValuesOnly, grid2.hashCodeFromValuesOnly);
+        expect(grid1.relativeHashCode, grid2.relativeHashCode);
       });
 
       test(
-          'Test hashCodeFromValuesOnly multiple items added in the same order to the same places',
+          'Test relativeHashCode multiple items added in the same order to the same places',
           () {
         final grid1 = Grid<int>();
         final grid2 = Grid<int>();
@@ -367,25 +367,33 @@ M       L
         grid2.set(const Coordinates(x: 0, y: 0), 42);
         grid2.set(const Coordinates(x: 1, y: 0), 43);
         grid2.set(const Coordinates(x: 0, y: 1), 44);
-        expect(grid1.hashCodeFromValuesOnly, grid2.hashCodeFromValuesOnly);
+        expect(grid1.relativeHashCode, grid2.relativeHashCode);
       });
 
       test(
-          'Test hashCodeFromValuesOnly multiple items added in the same order to different places',
+          'Test relativeHashCode multiple items added in the same order to different places',
           () {
         final grid1 = Grid<int>();
         final grid2 = Grid<int>();
+        // grid1:
+        // 42 43
+        // 44 __
+        // grid2:
+        // __ __
+        // __ 42 43
+        // __ 44
         grid1.set(const Coordinates(x: 0, y: 0), 42);
         grid1.set(const Coordinates(x: 1, y: 0), 43);
         grid1.set(const Coordinates(x: 0, y: 1), 44);
         grid2.set(const Coordinates(x: 1, y: 1), 42);
         grid2.set(const Coordinates(x: 2, y: 1), 43);
         grid2.set(const Coordinates(x: 1, y: 2), 44);
-        expect(grid1.hashCodeFromValuesOnly, grid2.hashCodeFromValuesOnly);
+
+        expect(grid1.relativeHashCode, grid2.relativeHashCode);
       });
 
       test(
-          'Test hashCodeFromValuesOnly multiple items added in different order to the same places',
+          'Test relativeHashCode multiple items added in different order to the same places',
           () {
         final grid1 = Grid<int>();
         final grid2 = Grid<int>();
@@ -395,30 +403,103 @@ M       L
         grid2.set(const Coordinates(x: 0, y: 1), 44);
         grid2.set(const Coordinates(x: 1, y: 0), 43);
         grid2.set(const Coordinates(x: 0, y: 0), 42);
-        expect(grid1.hashCodeFromValuesOnly, grid2.hashCodeFromValuesOnly);
+        expect(grid1.relativeHashCode, grid2.relativeHashCode);
       });
 
       test(
-          'Test hashCodeFromValuesOnly multiple items added in different order to different places',
+          'Test relativeHashCode items added in different order with one item moving to a different column',
           () {
         final grid1 = Grid<int>();
         final grid2 = Grid<int>();
+        // grid1:
+        // 42 43
+        // 44 __
+        // grid2:
+        // __ __ __
+        // __ 42 43
+        // __ __ 44
         grid1.set(const Coordinates(x: 0, y: 0), 42);
         grid1.set(const Coordinates(x: 1, y: 0), 43);
         grid1.set(const Coordinates(x: 0, y: 1), 44);
-        grid2.set(const Coordinates(x: 1, y: 2), 44);
+        grid2.set(const Coordinates(x: 2, y: 2), 44);
         grid2.set(const Coordinates(x: 2, y: 1), 43);
         grid2.set(const Coordinates(x: 1, y: 1), 42);
-        expect(grid1.hashCodeFromValuesOnly, grid2.hashCodeFromValuesOnly);
+
+        expect(grid1.relativeHashCode, isNot(grid2.relativeHashCode));
+      });
+      test('Test relativeHashCode extra row between items', () {
+        final grid1 = Grid<int>();
+        final grid2 = Grid<int>();
+        // grid1:
+        // 42 43
+        // 44 __
+        // grid2:
+        // 42 43
+        // __ __
+        // 44 __
+        grid1.set(const Coordinates(x: 0, y: 0), 42);
+        grid1.set(const Coordinates(x: 1, y: 0), 43);
+        grid1.set(const Coordinates(x: 0, y: 1), 44);
+        grid2.set(const Coordinates(x: 0, y: 2), 44);
+        grid2.set(const Coordinates(x: 1, y: 0), 43);
+        grid2.set(const Coordinates(x: 0, y: 0), 42);
+
+        expect(grid1.relativeHashCode, isNot(grid2.relativeHashCode));
       });
 
-      test('Test hashCodeFromValuesOnly different grids', () {
+      test('Test relativeHashCode extra column between items', () {
+        final grid1 = Grid<int>();
+        final grid2 = Grid<int>();
+        // grid1:
+        // 42 43
+        // 44 __
+        // grid2:
+        // 42 __ 43
+        // 44 __
+        grid1.set(const Coordinates(x: 0, y: 0), 42);
+        grid1.set(const Coordinates(x: 1, y: 0), 43);
+        grid1.set(const Coordinates(x: 0, y: 1), 44);
+        grid2.set(const Coordinates(x: 0, y: 1), 44);
+        grid2.set(const Coordinates(x: 2, y: 0), 43);
+        grid2.set(const Coordinates(x: 0, y: 0), 42);
+        expect(grid1.relativeHashCode, isNot(grid2.relativeHashCode));
+      });
+
+      test(
+          'Test relativeHashCode extra row between items - one item per column',
+          () {
+        final grid1 = Grid<int>();
+        final grid2 = Grid<int>();
+        // grid1:
+        // 42 __
+        // __ 43
+        // grid2:
+        // 42 __
+        // __ __
+        // __ 43
+        grid1.set(const Coordinates(x: 0, y: 0), 42);
+        grid1.set(const Coordinates(x: 1, y: 1), 43);
+
+        grid2.set(const Coordinates(x: 0, y: 0), 42);
+        grid2.set(const Coordinates(x: 2, y: 1), 43);
+
+        expect(grid1.relativeHashCode, isNot(grid2.relativeHashCode));
+      });
+
+      test('Test relativeHashCode different grids', () {
         final grid1 = Grid<int>();
         final grid2 = Grid<int>();
         grid1.set(const Coordinates(x: 0, y: 0), 42);
         grid2.set(const Coordinates(x: 0, y: 0), 43);
-        expect(
-            grid1.hashCodeFromValuesOnly, isNot(grid2.hashCodeFromValuesOnly));
+        expect(grid1.relativeHashCode, isNot(grid2.relativeHashCode));
+      });
+
+      test('Test relativeHashCode single item grids with negative y value ',() {
+        final grid1 = Grid<int>();
+        final grid2 = Grid<int>();
+        grid1.set(const Coordinates(x: 0, y: 0), 42);
+        grid2.set(const Coordinates(x: 0, y: -1), 42);
+        expect(grid1.relativeHashCode, grid2.relativeHashCode);
       });
     });
 

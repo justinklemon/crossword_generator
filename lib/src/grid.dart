@@ -15,7 +15,7 @@ class Grid<T> {
   }
 
   /// Returns the value at the given [coord].
-  /// 
+  ///
   /// If the [coord] is not present in the grid, returns null.
   T? get(Coordinates coord) {
     return _grid[coord.x]?[coord.y];
@@ -42,7 +42,7 @@ class Grid<T> {
   }
 
   /// Returns a list of lists representing the grid.
-  /// 
+  ///
   /// The inner lists represent the rows of the grid.
   /// If the grid is empty, returns an empty list.
   /// Positive x values are to the right, and positive y values are down.
@@ -61,7 +61,7 @@ class Grid<T> {
   }
 
   /// Returns the minimum x index in the grid.
-  /// 
+  ///
   /// If the grid is empty, throws a [StateError].
   int get minXindex {
     if (_grid.isEmpty) throw StateError('Grid is empty');
@@ -70,7 +70,7 @@ class Grid<T> {
   }
 
   /// Returns the maximum x index in the grid.
-  /// 
+  ///
   /// If the grid is empty, throws a [StateError].
   int get maxXindex {
     if (_grid.isEmpty) throw StateError('Grid is empty');
@@ -79,18 +79,18 @@ class Grid<T> {
   }
 
   /// Returns the minimum y index in the grid.
-  /// 
+  ///
   /// If the grid is empty, throws a [StateError].
   int get minYindex {
     if (_grid.isEmpty) throw StateError('Grid is empty');
     return _grid.values
-        .map((row) => row.keys
+        .map((column) => column.keys
             .reduce((value, element) => value < element ? value : element))
         .reduce((value, element) => value < element ? value : element);
   }
 
   /// Returns the maximum y index in the grid.
-  /// 
+  ///
   /// If the grid is empty, throws a [StateError].
   int get maxYindex {
     if (_grid.isEmpty) throw StateError('Grid is empty');
@@ -101,7 +101,7 @@ class Grid<T> {
   }
 
   /// Returns the number of rows in the grid.
-  /// 
+  ///
   /// If the grid is empty, returns 0.
   int get rows {
     if (_grid.isEmpty) return 0;
@@ -109,7 +109,7 @@ class Grid<T> {
   }
 
   /// Returns the number of columns in the grid.
-  /// 
+  ///
   /// If the grid is empty, returns 0.
   int get columns {
     if (_grid.isEmpty) return 0;
@@ -128,7 +128,7 @@ class Grid<T> {
   }
 
   /// Returns a new grid with the values normalized to the top-left corner.
-  /// 
+  ///
   /// If the grid is empty, returns an empty grid.
   /// The top-left corner of the grid will be (0, 0).
   /// The relative positions of the values will be preserved.
@@ -232,12 +232,10 @@ class Grid<T> {
     return true;
   }
 
-  /// Returns a hash code based on the values of the grid only.
   /// The hash code is computed by sorting the grid by keys and then
-  /// computing the hash code of the values.
-  /// This method is useful when the keys are not important for the
-  /// equality of the grid.
-  int get hashCodeFromValuesOnly {
+  /// computing the hash code of the values, taking into account the
+  /// distance between the previous value and the current value.
+  int get relativeHashCode {
     const int prime = 31;
 
     // Sort the outer map by keys
@@ -246,16 +244,28 @@ class Grid<T> {
 
     // Compute the hash code
     return sortedColumns.fold(0, (prevColumnHash, entry) {
-      // Sort the inner map by keys
-      var sortedRows = entry.value.entries.toList()
+      int columnIndex = sortedColumns.indexOf(entry);
+      int xIndex = entry.key;
+      int prevXIndex = columnIndex > 0 ? sortedColumns[columnIndex - 1].key : xIndex;
+      // Calculate the distance from the previous column
+      int xDistance = xIndex - prevXIndex;
+      // Sort the row by keys
+      var columnEntries = entry.value.entries.toList()
         ..sort((a, b) => a.key.compareTo(b.key));
 
-      // Compute the hash code for the inner map
-      int valueHash = sortedRows.fold(0, (prevRowHash, rowEntry) {
-        return prime * prevRowHash + rowEntry.value.hashCode;
+      // Compute the hash code for the column
+      int valueHash = columnEntries.fold(0, (prevRowHash, rowEntry) {
+        int index = columnEntries.indexOf(rowEntry);
+        int yIndex = rowEntry.key;
+        int prevYIndex = index > 0 ? columnEntries[index - 1].key : yIndex;
+        // Calculate the distance from the previous value
+        int yDistance = yIndex - prevYIndex;
+        return prime * prevRowHash +
+            rowEntry.value.hashCode +
+            yDistance.hashCode;
       });
 
-      return prime * prevColumnHash + valueHash;
+      return prime * prevColumnHash + valueHash + xDistance.hashCode;
     });
   }
 

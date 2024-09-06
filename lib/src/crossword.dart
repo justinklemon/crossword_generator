@@ -208,6 +208,6 @@ class Crossword {
 
   @override
   int get hashCode {
-    return grid.hashCodeFromValuesOnly;
+    return grid.relativeHashCode;
   }
 }
