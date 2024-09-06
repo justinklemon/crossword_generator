@@ -1,6 +1,6 @@
 name: crossword_generator
 description: "Generate all possible crosswords from a list of words."
-version: 0.0.1
+version: 0.0.2
 homepage:
 
 environment:
