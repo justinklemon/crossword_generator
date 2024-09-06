@@ -179,4 +179,88 @@ void main() {
     final List<Crossword> crosswords = generateCrosswords(['hello', 'zany']);
     expect(crosswords.length, 0);
   });
+
+  group('Test placeWord', () {
+    test('Test placeWord with no conflicts', () {
+      final Crossword crossword = Crossword.startWithHorizontalWord('hello');
+      final PositionedWord word = PositionedWord.vertical(
+        word: 'world',
+        start: const Coordinates(x: 3, y: -3),
+      );
+      final Crossword? newCrossword =
+          placeWord(crossword, word, ['hello', 'world'], []);
+      expect(newCrossword, isNotNull);
+      expect(newCrossword!.placedWords, contains(word));
+    });
+
+    test('Test placeWord with conflicts', () {
+      final Crossword crossword = Crossword.startWithHorizontalWord('hello');
+      final PositionedWord word = PositionedWord.vertical(
+        word: 'world',
+        start: const Coordinates(x: 3, y: -4),
+      );
+      final Crossword? newCrossword =
+          placeWord(crossword, word, ['hello', 'world'], []);
+      expect(newCrossword, isNull);
+    });
+
+    test('Test placeWord with perfect overlap', () {
+      final PositionedWord shop = PositionedWord.horizontal(
+        word: 'shop',
+        start: const Coordinates(x: 0, y: 0),
+      );
+      final PositionedWord paws = PositionedWord.vertical(
+        word: 'paws',
+        start: const Coordinates(x: 0, y: -3),
+      );
+      final PositionedWord greeds = PositionedWord.vertical(
+        word: 'greeds',
+        start: const Coordinates(x: 0, y: -5),
+      );
+      final Crossword crossword = Crossword([shop, paws]);
+      
+
+      final Crossword? newCrossword = placeWord(
+        crossword,
+        greeds,
+        ['shop', 'paws', 'greeds'],
+        [],
+      );
+      expect(newCrossword, isNull);
+    });
+
+    test('Test placeWord with accidental placement', () {
+      final PositionedWord thomas = PositionedWord.horizontal(
+        word: 'thomas',
+        start: const Coordinates(x: 0, y: 0),
+      );
+      final PositionedWord chest = PositionedWord.vertical(
+        word: 'chest',
+        start: const Coordinates(x: 0, y: -4),
+      );
+      final PositionedWord alamo = PositionedWord.vertical(
+        word: 'alamo',
+        start: const Coordinates(x: 2, y: -4),
+      );
+      final PositionedWord ahead = PositionedWord.vertical(
+        word: 'ahead',
+        start: const Coordinates(x: 1, y: -1),
+      );
+      final PositionedWord sam = PositionedWord.horizontal(
+        word: 'sam',
+        start: const Coordinates(x: 0, y: -1),
+      );
+      final Crossword crossword = Crossword([thomas, chest, alamo]);
+      print(crossword.toPrettyString());
+      final Crossword? newCrossword = placeWord(
+        crossword,
+        ahead,
+        ['thomas', 'chest', 'alamo', 'ahead', 'sam'],
+        ['sam'],
+      );
+      expect(newCrossword, isNotNull);
+      expect(newCrossword!.placedWords, contains(ahead));
+      expect(newCrossword.placedWords, contains(sam));
+    });
+  });
 }
